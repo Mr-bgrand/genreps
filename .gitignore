@@ -8,3 +8,4 @@ output/
 public/
 .env
 .env.*
+*.log

@@ -26,11 +26,23 @@ python3 build_site.py
 python3 -m http.server 8000 --directory public
 ```
 
-The build publishes only `public/index.html` and `public/refresh.html`. Photos are embedded in the gallery, avoiding expiring thumbnail URLs. Generated data, caches, credentials, and virtual environments are excluded from Git.
+The build publishes a photo viewer, `catalog.json`, and active-watch image files. Only still photos are imported; videos are excluded. Active watches show all available photos. Archived watches retain a single JPEG cover, stored once in catalog.json, with no extra photo files.
+
+## Sold archive
+
+A successful refresh compares both Dropbox sources with the previous production catalog. A missing stock number, or folder ID when there is no stock number, moves the watch into Sold Archive. Moving a stock number between folders or between Inbound and In Stock does not mark it sold. Reappearing stock numbers become active again. Folders still present without supported photos retain their last cover and remain active.
+
+Archive entries are grouped by brand and model inferred from folder titles; unrecognized names go under Other brands / Other models. The archive date is the detection time, not an asserted sale date.
+
+**Archive persistence:** Each build reads the last successful production deployment at https://watch-collection-mrbgrands-projects.vercel.app/catalog.json before importing Dropbox. The first update migrates the old embedded gallery automatically. If the prior catalog is inaccessible, invalid, or missing photos, the build fails rather than resetting history. Keep this production URL public and stable. Changing the domain requires updating `PRODUCTION` in build_site.py. The current deployment is the archive store; rolling back to an older deployment also restores its older archive. Download catalog.json as a backup before rollbacks. Serialize production refreshes so concurrent builds cannot replace newer history.
+
+Missing photos from sold watches are removed from the new deployment output. Historical Vercel deployments are retained according to Vercel's own retention settings; this code does not delete previous deployments.
+
+Generated data, caches, credentials, and virtual environments are excluded from Git.
 
 ## Cover selection
 
-135 reviewed choices are pinned in `covers.json`. New watches use a filename hint or a suggested third photo; this is not visual recognition. Use the original cover-review updater to review additions, copy the updated covers.json here, and push. The hosted build does not use the optional paid AI selector.
+135 original reviewed choices are pinned in `covers.json`. New watches use a filename hint or a suggested third photo; this is not visual recognition. Use the original cover-review updater to review additions, copy the updated covers.json here, and push. The hosted build does not use the optional paid AI selector.
 
 ## Maintenance
 

@@ -88,7 +88,7 @@ def process_folder(source, folder, cfg, offline, override, depth=0):
                          'folder_url':folder['url'],'photo_count':len(photos),'photos':photos,
                          'cover_id':picked['id'],'cover_image':picked['local_image'],
                          'cover_method':method,'needs_review':review,'price':None,'currency':None})
-    if not photos and not children: skipped.append({'source':source['name'],'name':folder['name'],'reason':'No supported images or subfolders'})
+    if not photos: skipped.append({'source':source['name'],'status':source['status'],'name':folder['name'],'folder_id':folder['id'],'reason':'Folder present without supported images'})
     for child in children:
         if child['name'].casefold() in {s.casefold() for s in cfg.get('exclude_folders',[])}:
             skipped.append({'source':source['name'],'name':child['name'],'reason':'Excluded non-watch section'}); continue
@@ -97,7 +97,9 @@ def process_folder(source, folder, cfg, offline, override, depth=0):
 
 
 def build(args):
-    cfg = load_json(ROOT/'sources.json',{}); cfg['_resume']=args.resume; cfg['_ai_choices']=load_json(ROOT/'ai-covers.json',{}); override = load_json(ROOT/'covers.json',{})
+    cfg = load_json(ROOT/'sources.json',{});
+    if getattr(args, 'all_photos', False): cfg['candidate_photos'] = None
+    cfg['_resume']=args.resume; cfg['_ai_choices']=load_json(ROOT/'ai-covers.json',{}); override = load_json(ROOT/'covers.json',{})
     out = ROOT/'output';out.mkdir(exist_ok=True)
     previous = load_json(out/'catalog.json',{'products':[]})
     all_products = [];skipped = [];errors = [];source_summary = [];jobs = []
@@ -149,7 +151,7 @@ def build(args):
             for k,v in row.items():
                 if isinstance(v,str) and v.startswith(('=','+','-','@')):row[k]="'"+v
             writer.writerow(row)
-    render(snapshot,out)
+    if not getattr(args, 'skip_render', False): render(snapshot,out)
     (out/'changes.json').write_text(json.dumps(changes,indent=2),encoding='utf-8')
     print('DONE: '+str(len(products))+' listings; '+str(sum(p['needs_review'] for p in products))+' covers need review.',flush=True)
     return snapshot

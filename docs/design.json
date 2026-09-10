@@ -1,0 +1,22 @@
+{
+  "DesignSignalPacket": {
+    "composition_state": {
+      "primary_anchor": "Watch photography",
+      "secondary_anchor": "Watch identity and availability",
+      "grid": "2 columns on phones, 3 on tablets, 4 to 5 on desktop",
+      "margins": "14px mobile, 28px desktop; content max 1440px",
+      "interaction": "Sticky search and filters; full-screen mobile photo dialog; 44px minimum primary controls",
+      "archive": "Separate Sold Archive tab, brand headings, model subheadings, one cover per watch"
+    },
+    "typography_state": {
+      "family": "System sans-serif",
+      "brand": "GenREPS exact mixed case, 32px mobile / 40px desktop",
+      "card_title": "12px mobile / 14px desktop, 1.5 line height",
+      "body": "14px / 1.5",
+      "background": "#f5f4f0",
+      "header": "#242424",
+      "body_text": "#242424",
+      "muted_text": "#66645e"
+    }
+  }
+}
