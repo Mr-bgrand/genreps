@@ -4,8 +4,8 @@ Searchable watch gallery built from public Dropbox folders, with In Stock and In
 
 ## Vercel deployment
 
-Existing project: `watch-collection` in `mrbgrands-projects`.
-Production URL: https://watch-collection-mrbgrands-projects.vercel.app/
+Git-linked project: `genreps` in `mrbgrands-projects`.
+Original gallery / migration source: https://watch-collection-mrbgrands-projects.vercel.app/
 GitHub repository: https://github.com/Mr-bgrand/genreps
 
 Connect this repository in the existing Vercel project under **Settings → Git**. Use `main` as the production branch, the repository root as the root directory, and Other as the framework. `vercel.json` supplies the install command, build command, and public output directory. Pushes to main will trigger builds once the Git integration is connected.
@@ -34,7 +34,7 @@ A successful refresh compares both Dropbox sources with the previous production 
 
 Archive entries are grouped by brand and model inferred from folder titles; unrecognized names go under Other brands / Other models. The archive date is the detection time, not an asserted sale date.
 
-**Archive persistence:** Each build reads the last successful production deployment at https://watch-collection-mrbgrands-projects.vercel.app/catalog.json before importing Dropbox. The first update migrates the old embedded gallery automatically. If the prior catalog is inaccessible, invalid, or missing photos, the build fails rather than resetting history. Keep this production URL public and stable. Changing the domain requires updating `PRODUCTION` in build_site.py. The current deployment is the archive store; rolling back to an older deployment also restores its older archive. Download catalog.json as a backup before rollbacks. Serialize production refreshes so concurrent builds cannot replace newer history.
+**Archive persistence:** Each build reads the last successful production deployment at its own production domain, using Vercel’s `VERCEL_PROJECT_PRODUCTION_URL` before importing Dropbox. The first update migrates the old embedded gallery automatically. If the prior catalog is inaccessible, invalid, or missing photos, the build fails rather than resetting history. Keep this production URL public and stable. Outside Vercel, the original watch-collection URL is used as the default migration source. The current deployment is the archive store; rolling back to an older deployment also restores its older archive. Download catalog.json as a backup before rollbacks. Serialize production refreshes so concurrent builds cannot replace newer history.
 
 Missing photos from sold watches are removed from the new deployment output. Historical Vercel deployments are retained according to Vercel's own retention settings; this code does not delete previous deployments.
 

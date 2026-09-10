@@ -1,11 +1,11 @@
 """Build active photo galleries and retain the previous deployment's sold archive."""
-import argparse,base64,io,json,re,shutil,urllib.error,urllib.request
+import argparse,base64,io,json,os,re,shutil,urllib.error,urllib.request
 from datetime import datetime,timezone
 from pathlib import Path
 from PIL import Image
 import archive,catalog
 ROOT=Path(__file__).resolve().parent
-PRODUCTION='https://watch-collection-mrbgrands-projects.vercel.app'
+PRODUCTION='https://'+os.environ.get('VERCEL_PROJECT_PRODUCTION_URL','watch-collection-mrbgrands-projects.vercel.app')
 
 def fetch(url):
     request=urllib.request.Request(url,headers={'Cache-Control':'no-cache','User-Agent':'GenREPS-Build/1.1'})
@@ -59,6 +59,9 @@ def main():
     data={'version':2,'updated_at':now,'products':products,'sources':snapshot['sources']}
     (public/'catalog.json').write_text(catalog.safe_json(data))
     for name in ('index.html','gallery.js','gallery.css','refresh.html'): shutil.copyfile(ROOT/name,public/name)
+    refresh=(public/'refresh.html').read_text()
+    project=os.environ.get('VERCEL_PROJECT_NAME','genreps')
+    (public/'refresh.html').write_text(refresh.replace('watch-collection',project))
     archived=sum(p['status']=='sold' for p in products)
     print(f'Published {len(products)-archived} active watches and {archived} archived watches; one cover per archive entry.')
 if __name__=='__main__': main()
