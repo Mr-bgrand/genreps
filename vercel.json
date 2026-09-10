@@ -1,0 +1,14 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "python3 -m pip install --target .python-packages -r requirements.txt",
+  "buildCommand": "PYTHONPATH=.python-packages python3 build_site.py",
+  "outputDirectory": "public",
+  "headers": [{
+    "source": "/(.*)",
+    "headers": [
+      {"key": "X-Content-Type-Options", "value": "nosniff"},
+      {"key": "Referrer-Policy", "value": "no-referrer"}
+    ]
+  }]
+}

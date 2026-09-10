@@ -1,0 +1,8 @@
+{
+  "sources": [
+    {"name": "In Stock", "status": "in_stock", "url": "https://www.dropbox.com/scl/fo/rqk4etk0oyvy78c8znayp/AMdleQEZeO1CqEHNlk6q7xs?rlkey=56rt3rkb677l7km8069ymjime&dl=0"},
+    {"name": "Inbound", "status": "inbound", "url": "https://www.dropbox.com/scl/fo/gh79hadt7oyw4bebzyp0c/AEDTOQHoud4Pw_Nv4HwYdRY?rlkey=c3e64o6nnzz9hgay77mrm3ok7&dl=0"}
+  ],
+  "exclude_folders": ["01-Genuine Parts", "Luggage and Purses"],
+  "candidate_photos": 6
+}
