@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+.python-packages/
+.venv/
+.vercel/
+cache/
+output/
+public/
+.env
+.env.*
