@@ -58,7 +58,7 @@ def main():
     products=archive.reconcile(previous['products'],current,now,snapshot['skipped'])
     data={'version':2,'updated_at':now,'products':products,'sources':snapshot['sources']}
     (public/'catalog.json').write_text(catalog.safe_json(data))
-    for name in ('index.html','gallery.js','gallery.css','refresh.html'): shutil.copyfile(ROOT/name,public/name)
+    for name in ('index.html','gallery.js','gallery.css','refresh.html','layout-check.html'): shutil.copyfile(ROOT/name,public/name)
     refresh=(public/'refresh.html').read_text()
     project=os.environ.get('VERCEL_PROJECT_NAME','genreps')
     (public/'refresh.html').write_text(refresh.replace('watch-collection',project))
