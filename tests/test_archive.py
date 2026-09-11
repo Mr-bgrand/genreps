@@ -36,3 +36,16 @@ class ArchiveTests(unittest.TestCase):
   self.assertEqual(archive.classify('Batgirl VSF 6X07A829'),('Rolex','GMT-Master II'))
   self.assertEqual(archive.classify('PP 5167r 330 DDF G07271'),('Patek Philippe','Aquanaut'))
   self.assertEqual(archive.classify('Omega SMP Summer Blue G07035'),('Omega','Seamaster'))
+
+class FirstSeenTests(unittest.TestCase):
+ def test_new_watch_gets_detection_date(self):
+  for status in ('in_stock','inbound'):
+   self.assertEqual(archive.reconcile([],[watch(status=status)],'2026-09-11T19:00:00Z')[0]['first_seen_at'],'2026-09-11T19:00:00Z')
+ def test_existing_inventory_is_not_marked_new(self):
+  self.assertIsNone(archive.reconcile([watch()],[watch()],'now')[0]['first_seen_at'])
+ def test_date_survives_moves_sale_and_return(self):
+  old=watch(status='inbound');old['first_seen_at']='2026-09-01T00:00:00Z'
+  moved=archive.reconcile([old],[watch(folder='moved')],'later')[0]
+  sold=archive.reconcile([moved],[],'later')[0]
+  returned=archive.reconcile([sold],[watch()],'later')[0]
+  self.assertEqual(returned['first_seen_at'],old['first_seen_at'])

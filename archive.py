@@ -31,7 +31,10 @@ def classify(title):
     return brand or 'Other brands',next((m for pattern,m in models.get(brand,[]) if re.search(pattern,t)),'Other models')
 
 def reconcile(previous,current,now,present_folders=()):
+    previous_by_id={identity(p):p for p in previous}
     active={identity(p):copy.deepcopy(p) for p in current}
+    for key,p in active.items():
+        p['first_seen_at']=previous_by_id[key].get('first_seen_at') if key in previous_by_id else now
     if len(active)!=len(current): raise ValueError('Duplicate stock number; resolve before publishing.')
     present={identity({'id':f['folder_id'],'folder_id':f['folder_id'],'title':f['name']}):f for f in present_folders if f.get('folder_id')}
     for p in previous:
