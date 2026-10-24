@@ -32,10 +32,26 @@ def classify(title):
 
 def reconcile(previous,current,now,present_folders=()):
     previous_by_id={identity(p):p for p in previous}
-    active={identity(p):copy.deepcopy(p) for p in current}
+    grouped={}
+    for p in current:
+        grouped.setdefault(identity(p),[]).append(p)
+    active={}
+    for key,entries in grouped.items():
+        chosen=entries[0]
+        if len(entries)>1:
+            # A watch may briefly remain in Inbound after arriving In Stock.
+            # Only collapse an exact-title pair with one entry in each status.
+            if (key.startswith('sku:') and len(entries)==2
+                    and {p['status'] for p in entries}=={'in_stock','inbound'}
+                    and entries[0]['title']==entries[1]['title']):
+                chosen=next(p for p in entries if p['status']=='in_stock')
+                print('Source overlap: '+key+'; using In Stock listing '+chosen['title'],flush=True)
+            else:
+                details='; '.join(p['status']+': '+p['title']+' ['+p.get('folder_id',p['id'])+']' for p in entries)
+                raise ValueError('Duplicate stock number '+key+'; conflicting listings: '+details)
+        active[key]=copy.deepcopy(chosen)
     for key,p in active.items():
         p['first_seen_at']=previous_by_id[key].get('first_seen_at') if key in previous_by_id else now
-    if len(active)!=len(current): raise ValueError('Duplicate stock number; resolve before publishing.')
     present={identity({'id':f['folder_id'],'folder_id':f['folder_id'],'title':f['name']}):f for f in present_folders if f.get('folder_id')}
     for p in previous:
         key=identity(p)
@@ -56,3 +72,4 @@ def reconcile(previous,current,now,present_folders=()):
         if p['status']!='sold': p.pop('archived_at',None)
         result.append(p)
     return sorted(result,key=lambda p:(p['status']=='sold',p['brand'],p['model'],p['title']))
+

@@ -32,6 +32,34 @@ class ArchiveTests(unittest.TestCase):
   self.assertEqual(archive.identity(watch(title='Vintage watch')),'folder:folder1')
  def test_duplicate_stock_number_stops_refresh(self):
   with self.assertRaises(ValueError):archive.reconcile([],[watch(),watch(folder='other')],'today')
+ def test_matching_stock_and_inbound_prefers_stock_in_either_order(self):
+  old=watch(status='inbound');old['first_seen_at']='2026-10-01T00:00:00Z'
+  inbound=watch(folder='incoming',status='inbound')
+  stocked=watch(folder='arrived');stocked['cover']['id']='stock-face'
+  original=copy.deepcopy([inbound,stocked])
+  for current in ([inbound,stocked],[stocked,inbound]):
+   result=archive.reconcile([old],current,'today')
+   self.assertEqual(len(result),1)
+   self.assertEqual(result[0]['folder_id'],'arrived')
+   self.assertEqual(result[0]['status'],'in_stock')
+   self.assertEqual(result[0]['cover']['id'],'stock-face')
+   self.assertEqual(result[0]['photos'],stocked['photos'])
+   self.assertEqual(result[0]['first_seen_at'],'2026-10-01T00:00:00Z')
+  self.assertEqual([inbound,stocked],original)
+ def test_conflicting_titles_across_sources_still_stop(self):
+  with self.assertRaisesRegex(ValueError,'G12345'):
+   archive.reconcile([],[watch(),watch(title='Submariner VSF G12345',folder='other',status='inbound')],'today')
+ def test_three_copies_cannot_hide_same_source_duplicate(self):
+  with self.assertRaises(ValueError):
+   archive.reconcile([],[watch(),watch(folder='incoming',status='inbound'),watch(folder='other')],'today')
+ def test_overlap_then_move_then_sale_retains_one_history_entry(self):
+  inbound=watch(folder='incoming',status='inbound');stocked=watch(folder='arrived')
+  overlap=archive.reconcile([],[inbound,stocked],'first')
+  moved=archive.reconcile(overlap,[stocked],'second')
+  sold=archive.reconcile(moved,[],'third')
+  self.assertEqual(len(sold),1);self.assertEqual(sold[0]['status'],'sold')
+  self.assertEqual(sold[0]['photos'],[]);self.assertEqual(sold[0]['photo_count'],1)
+  self.assertEqual(sold[0]['first_seen_at'],'first');self.assertEqual(sold[0]['archived_at'],'third')
  def test_brand_model_grouping(self):
   self.assertEqual(archive.classify('Batgirl VSF 6X07A829'),('Rolex','GMT-Master II'))
   self.assertEqual(archive.classify('PP 5167r 330 DDF G07271'),('Patek Philippe','Aquanaut'))
@@ -49,3 +77,4 @@ class FirstSeenTests(unittest.TestCase):
   sold=archive.reconcile([moved],[],'later')[0]
   returned=archive.reconcile([sold],[watch()],'later')[0]
   self.assertEqual(returned['first_seen_at'],old['first_seen_at'])
+
